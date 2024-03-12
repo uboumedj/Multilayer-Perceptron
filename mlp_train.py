@@ -73,24 +73,23 @@ def main(file, batch_size, epochs, learning_rate, loss, layer, model_path):
 
     loss_log, val_loss_log, acc_log, val_acc_log = [], [], [], []
 
-    """layer_list = []
-    layer_list.append(layers.DenseLayer(x_train.shape[1], 24, activation='sigmoid'))
-    layer_list.append(layers.DenseLayer(24, 24, activation='sigmoid', weights_initializer='heUniform'))
-    layer_list.append(layers.DenseLayer(24, 24, activation='sigmoid', weights_initializer='heUniform'))
-    layer_list.append(layers.DenseLayer(24, 2, activation='softmax', weights_initializer='heUniform'))
-    network = model.createNetwork(layer_list)"""
-    # Network structure definition
     layer_list = []
+    layer_list.append(layers.DenseLayer(x_train.shape[1], 24, activation='relu', weights_initializer='heUniform'))
+    layer_list.append(layers.DenseLayer(24, 24, activation='sigmoid', weights_initializer='xavierUniform'))
+    layer_list.append(layers.DenseLayer(24, 24, activation='sigmoid', weights_initializer='xavierUniform'))
+    layer_list.append(layers.DenseLayer(24, 2, activation='softmax', weights_initializer='heUniform'))
+    network = model.createNetwork(layer_list)
+    # Network structure definition
+    """ layer_list = []
     layer_list.append(layers.DenseLayer(x_train.shape[1], 50, activation='relu', learning_rate=learning_rate))
     layer_list.append(layers.DenseLayer(50, 100, activation='relu', weights_initializer='heUniform'))
     layer_list.append(layers.DenseLayer(100, 2, activation='sigmoid', weights_initializer='heUniform'))
-    network = model.createNetwork(layer_list)
-
+    network = model.createNetwork(layer_list)"""
     # Training loop
     for epoch in range(epochs):
         # Train the model on each mini-batch
         for x_batch, y_batch in separate_batches(x_train, y_train, batch_size=batch_size):
-            model.train(network, x_batch, y_batch)
+            network.train(x_batch, y_batch)
 
         # Compute intermediary metrics on training set and validation set
         predictions_train = network.predict(x_train)

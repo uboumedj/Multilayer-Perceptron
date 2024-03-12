@@ -56,9 +56,9 @@ def softmax(x):
         return None
     if x.size == 0 or len(x.shape) != 2:
         return None
-    s = np.max(x, axis=1)
-    s = s[:, np.newaxis]
-    numerator = np.exp(x - s)
+    max = np.max(x, axis=1)
+    max = max[:, np.newaxis]
+    numerator = np.exp(x - max)
     denominator = np.sum(numerator, axis=1)
     denominator = denominator[:, np.newaxis]
     result = numerator / denominator

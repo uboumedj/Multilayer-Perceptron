@@ -1,33 +1,10 @@
 import numpy as np
 import pandas as pd
 import click
-import pickle
-import layers
-import model
-from utilities import load_data_from_file
+from utilities import load_data_from_file, load_trained_model
 from utilities import convert_predictions_to_labels
 from utilities import encode_one_hot, normalize_minmax
 from utilities import binary_cross_entropy, mean_squared_error
-from sklearn import preprocessing
-
-
-def load_trained_model(file_path):
-    """
-    Loads a trained model stored in a pickle file.
-    Arguments:
-        file_path (str): path to the stored model file
-    Returns:
-        The Model object stored in the file
-    """
-    try:
-        file = open(file_path, "rb")
-        model = pickle.load(file)
-        return model
-    except FileNotFoundError:
-        print(f"error: The file {file_path} doesn't exist !")
-    except pickle.UnpicklingError:
-        print(f"error: The file {file_path} is not a pkl file !")
-    return None
 
 
 @click.command()

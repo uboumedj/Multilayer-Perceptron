@@ -36,6 +36,20 @@ class Model():
         predictions = self.feed_forward(x)[-1]
         return predictions
 
+    def train(self, X, y):    
+        # Feed-forward part: get the network layers' activations
+        layer_activations = self.feed_forward(X)
+        layer_inputs = [X] + layer_activations
+        y_pred = layer_activations[-1]
+        
+        # Compute the loss and the initial (or final?) gradient
+        last_gradient = (y_pred - y) / y_pred.shape[0]
+
+        # Back-propagate the gradient through the layers
+        for i in range(len(self.layer_list))[::-1]:
+            layer = self.layer_list[i]
+            last_gradient = layer.backward(layer_inputs[i], last_gradient)
+    
     def _check_validity_layers(self, layer_list):
         """
         Checks the validity of the layer list received during
@@ -65,29 +79,3 @@ def createNetwork(layer_list):
     """
     network = Model(layer_list=layer_list)
     return network
-
-
-def grad_softmax_crossentropy_with_logits(logits, reference_answers):
-    # Compute crossentropy gradient from logits[batch,n_classes] and ids of correct answers
-    
-    softmax = np.exp(logits) / np.exp(logits).sum(axis=-1,keepdims=True)
-    
-    return (- reference_answers + softmax) / logits.shape[0]
-
-
-def train(network, X, y):    
-    # Feed-forward part: get the network layers' activations
-    layer_activations = network.feed_forward(X)
-    layer_inputs = [X] + layer_activations
-    y_pred = layer_activations[-1]
-    
-    # Compute the loss and the initial (or final?) gradient
-    #loss_grad = y_pred - y
-    last_gradient = grad_softmax_crossentropy_with_logits(y_pred, y)
-
-    # Back-propagate the gradient through the layers
-    for i in range(len(network.layer_list))[::-1]:
-        layer = network.layer_list[i]
-        last_gradient = layer.backward(layer_inputs[i], last_gradient)
-    network.finished_training = True
-    

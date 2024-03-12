@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import pickle
 
 
 def load_data_from_file(path):
@@ -20,6 +21,25 @@ def load_data_from_file(path):
         return None
     print(f"Loading dataset of dimensions {df.shape[0]} x {df.shape[1]}")
     return df
+
+
+def load_trained_model(file_path):
+    """
+    Loads a trained model stored in a pickle file.
+    Arguments:
+        file_path (str): path to the stored model file
+    Returns:
+        The Model object stored in the file
+    """
+    try:
+        file = open(file_path, "rb")
+        model = pickle.load(file)
+        return model
+    except FileNotFoundError:
+        print(f"error: The file {file_path} doesn't exist !")
+    except pickle.UnpicklingError:
+        print(f"error: The file {file_path} is not a pkl file !")
+    return None
 
 
 def save_data_to_file(dataset, path):
