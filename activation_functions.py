@@ -20,9 +20,22 @@ def sigmoid(x):
     return result
 
 
-def sigmoid_gradient(x, next_layer_gradient, cached_sigmoid_result):
-    if cached_sigmoid_result is not None:
-        sigmoid_derivative = cached_sigmoid_result * (1. - cached_sigmoid_result)
+def sigmoid_gradient(x, next_layer_gradient, cached_result):
+    """
+    Computes the gradient of the Sigmoid 'part' of the layer
+    for back-propagation
+    Args:
+        x (numpy.ndarray): vector of shape (m, 1).
+        next_layer_gradient (np.ndarray): the gradient received
+        from the next layer
+        cached_result (np.ndarray): potential cached result of the
+        previously calculated sigmoid(x), to save time
+    Returns:
+        The computed gradient
+        None if x is an empty numpy.ndarray.
+    """
+    if cached_result is not None:
+        sigmoid_derivative = cached_result * (1. - cached_result)
     else:
         sigmoid_derivative = sigmoid(x) * (1. - sigmoid(x))
     result = next_layer_gradient * sigmoid_derivative
@@ -70,6 +83,21 @@ def relu(x):
 
 
 def relu_gradient(x, next_layer_gradient):
+    """
+    Computes the gradient of the ReLU 'part' of the layer
+    for back-propagation
+    Args:
+        x (numpy.ndarray): vector of shape (m, 1).
+        next_layer_gradient (np.ndarray): the gradient received
+        from the next layer
+    Returns:
+        The computed gradient
+        None if x is an empty numpy.ndarray.
+    """
+    if not isinstance(x, np.ndarray):
+        return None
+    if x.size == 0:
+        return None
     relu_derivative = x > 0
     result = relu_derivative * next_layer_gradient
     return result
@@ -92,4 +120,26 @@ def tanh(x):
     numerator = np.exp(x_) - np.exp(np.negative(x_))
     denominator = np.exp(x_) + np.exp(np.negative(x_))
     result = np.divide(numerator, denominator)
+    return result
+
+
+def tanh_gradient(x, next_layer_gradient, cached_result):
+    """
+    Computes the gradient of the TanH 'part' of the layer
+    for back-propagation
+    Args:
+        x (numpy.ndarray): vector of shape (m, 1).
+        next_layer_gradient (np.ndarray): the gradient received
+        from the next layer
+        cached_result (np.ndarray): potential cached result of the
+        previously calculated tanh(x), to save time
+    Returns:
+        The computed gradient
+        None if x is an empty numpy.ndarray.
+    """
+    if cached_result is not None:
+        tanh_derivative = 1. - np.square(cached_result)
+    else:
+        tanh_derivative = 1. - np.square(tanh(x))
+    result = next_layer_gradient * tanh_derivative
     return result

@@ -127,6 +127,13 @@ def encode_one_hot(dataset):
 
 
 def normalize_minmax(dataset):
+    """
+    Perform minmax normalization on the columns of the dataset
+    Arguments:
+        dataset (pd.dataFrame): the dataset in need of normalization
+    Returns:
+        The normalized dataset
+    """
     normalized_dataset = dataset.copy()
     for col in normalized_dataset.columns:
         max = normalized_dataset[col].max()

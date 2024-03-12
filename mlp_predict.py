@@ -33,7 +33,7 @@ def load_trained_model(file_path):
 @click.command()
 @click.option('--data', default='data/data_test.csv',
               help='Dataset file path')
-@click.option('--model_path', default='mlp.pkl',
+@click.option('--model_path', default='models/mlp.pkl',
               help='Path to the stored trained model')
 @click.option('-d', '--details', is_flag=True, default=False,
               help='View details of every example prediction')
@@ -51,7 +51,7 @@ def main(data, model_path, details):
 
     # Use the model to predict the test dataset's labels
     if network is not None:
-        predictions = model.predict(network, x)
+        predictions = network.predict(x)
         prediction_labels = convert_predictions_to_labels(predictions)
 
         # Display metrics
