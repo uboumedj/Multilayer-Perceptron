@@ -7,9 +7,7 @@ import layers
 class Model():
     def __init__(self, layer_list, inputs=None):
         self.layer_list = self._check_validity_layers(layer_list)
-        self.inputs = inputs
-        self.loss_history = []
-        self.val_loss_history = []
+        self.finished_training = False
 
     def feed_forward(self, input):
         """
@@ -78,17 +76,18 @@ def grad_softmax_crossentropy_with_logits(logits, reference_answers):
 
 
 def train(network, X, y):    
-    # Get the layer activations
+    # Feed-forward part: get the network layers' activations
     layer_activations = network.feed_forward(X)
     layer_inputs = [X] + layer_activations
     y_pred = layer_activations[-1]
     
-    # Compute the loss and the initial gradient
+    # Compute the loss and the initial (or final?) gradient
     #loss_grad = y_pred - y
-    loss_grad = grad_softmax_crossentropy_with_logits(y_pred, y)
+    last_gradient = grad_softmax_crossentropy_with_logits(y_pred, y)
 
-    for layer_index in range(len(network.layer_list))[::-1]:
-        layer = network.layer_list[layer_index]
-        loss_grad = layer.backward(layer_inputs[layer_index], loss_grad)
-    return loss_grad
+    # Back-propagate the gradient through the layers
+    for i in range(len(network.layer_list))[::-1]:
+        layer = network.layer_list[i]
+        last_gradient = layer.backward(layer_inputs[i], last_gradient)
+    network.finished_training = True
     
