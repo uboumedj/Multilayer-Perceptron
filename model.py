@@ -7,7 +7,7 @@ from utilities import binary_cross_entropy
 
 
 class Model():
-    def __init__(self, layer_list, inputs=None):
+    def __init__(self, layer_list):
         self.layer_list = self._check_validity_layers(layer_list)
         self.finished_training = False
         self.epochs_trained = 0
@@ -75,6 +75,19 @@ class Model():
                 print(f"error: layer {layer} in list was not a layer")
                 return None
         return layer_list
+
+    def __str__(self):
+        """
+        Called when printing an instance of this class
+        """
+        model_to_string = f"Model {self.name if self.name is not None else ''}\n"
+        model_to_string += f"Layer structure: \n"
+        for i in range(0, len(self.layer_list)):
+            model_to_string += f"Layer {i + 1}. " + self.layer_list[i].__str__() + "\n"
+        model_to_string += f"Model has been trained for {self.epochs_trained} epochs "
+        model_to_string += f"and is currently "
+        model_to_string += f"{'not ' if not self.finished_training else ''}trained."
+        return model_to_string
 
 
 def createNetwork(layer_list):

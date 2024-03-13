@@ -150,3 +150,12 @@ class DenseLayer:
             case _:
                 output = output_gradient
         return output
+
+    def __str__(self):
+        """
+        Called when printing an instance of this class
+        """
+        layer_to_string = f"{self.weights.shape[1]} neurons, "
+        layer_to_string += f"{self.activation} activation function, "
+        layer_to_string += f"weights initialised using {self.weights_initializer}."
+        return layer_to_string
