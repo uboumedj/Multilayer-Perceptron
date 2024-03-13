@@ -2,12 +2,20 @@ import numpy as np
 import pandas as pd
 import math
 import layers
+from utilities import convert_predictions_to_labels
+from utilities import binary_cross_entropy
 
 
 class Model():
     def __init__(self, layer_list, inputs=None):
         self.layer_list = self._check_validity_layers(layer_list)
         self.finished_training = False
+        self.epochs_trained = 0
+        self.name = None
+        self.acc_log = []
+        self.val_acc_log = []
+        self.loss_log = []
+        self.val_loss_log = []
 
     def feed_forward(self, input):
         """
@@ -36,7 +44,7 @@ class Model():
         predictions = self.feed_forward(x)[-1]
         return predictions
 
-    def train(self, X, y):    
+    def train_one_epoch(self, X, y):    
         # Feed-forward part: get the network layers' activations
         layer_activations = self.feed_forward(X)
         layer_inputs = [X] + layer_activations
@@ -79,3 +87,49 @@ def createNetwork(layer_list):
     """
     network = Model(layer_list=layer_list)
     return network
+
+
+def separate_batches(x, y, batch_size):
+    """
+    Separates the dataset into random batches according to the
+    user-specified batch size
+    Arguments:
+        x (np.ndarray): training dataset
+        y (np.ndarray): target variables
+        batch_size (int): size of the function's batches
+    Yields:
+        Batches until whole dataset has been cycled through
+    """
+    if len(x) != len(y):
+        print(f"error: lengths of data and target are incompatible")
+        return None
+    indices = np.random.permutation(len(x))
+    for start_idx in range(0, len(x) - batch_size + 1, batch_size):
+        excerpt = indices[start_idx:start_idx + batch_size]
+        yield x[excerpt], y[excerpt]
+
+
+def fit(network, x_train, y_train, x_valid, y_valid, epochs, batch_size):
+    for epoch in range(epochs):
+        # Train the model on each mini-batch
+        for x_batch, y_batch in separate_batches(x_train, y_train, batch_size=batch_size):
+            network.train_one_epoch(x_batch, y_batch)
+        network.epochs_trained += 1
+
+        # Compute intermediary metrics on training set and validation set
+        predictions_train = network.predict(x_train)
+        labels_train = convert_predictions_to_labels(predictions_train)
+        network.acc_log.append(np.mean(labels_train == y_train))
+        network.loss_log.append(binary_cross_entropy(y_train, predictions_train))
+
+        predictions_valid = network.predict(x_valid)
+        labels_valid = convert_predictions_to_labels(predictions_valid)
+        network.val_acc_log.append(np.mean(labels_valid == y_valid))
+        network.val_loss_log.append(binary_cross_entropy(y_valid, predictions_valid))
+
+        print(f"epoch {epoch}/{epochs} - ", end="")
+        print(f"loss: {network.loss_log[-1]:.5f} - ", end="")
+        print(f"val_loss: {network.val_loss_log[-1]:.5f} - ", end="")
+        print(f"acc: {network.acc_log[-1]:.5f} - ", end="")
+        print(f"val_acc: {network.val_acc_log[-1]:.5f}")
+    network.finished_training = True

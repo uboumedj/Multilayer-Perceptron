@@ -8,28 +8,6 @@ import layers
 import model
 from utilities import split_data, load_data_from_file
 from utilities import encode_one_hot, normalize_minmax
-from utilities import convert_predictions_to_labels
-from utilities import binary_cross_entropy
-
-
-def separate_batches(x, y, batch_size):
-    """
-    Separates the dataset into random batches according to the
-    user-specified batch size
-    Arguments:
-        x (np.ndarray): training dataset
-        y (np.ndarray): target variables
-        batch_size (int): size of the function's batches
-    Yields:
-        Batches until whole dataset has been cycled through
-    """
-    if len(x) != len(y):
-        print(f"error: lengths of data and target are incompatible")
-        return None
-    indices = np.random.permutation(len(x))
-    for start_idx in range(0, len(x) - batch_size + 1, batch_size):
-        excerpt = indices[start_idx:start_idx + batch_size]
-        yield x[excerpt], y[excerpt]
 
 
 def confirm_file_save():
@@ -71,55 +49,35 @@ def main(file, batch_size, epochs, learning_rate, loss, layer, model_path):
     y_train = encode_one_hot(y_train)
     y_valid = encode_one_hot(y_valid)
 
-    loss_log, val_loss_log, acc_log, val_acc_log = [], [], [], []
-
+    # Network structure definition
     layer_list = []
-    layer_list.append(layers.DenseLayer(x_train.shape[1], 24, activation='relu', weights_initializer='heUniform'))
-    layer_list.append(layers.DenseLayer(24, 24, activation='sigmoid', weights_initializer='xavierUniform'))
-    layer_list.append(layers.DenseLayer(24, 24, activation='sigmoid', weights_initializer='xavierUniform'))
+    layer_list.append(layers.DenseLayer(x_train.shape[1], 24, activation='sigmoid', weights_initializer='heUniform'))
+    layer_list.append(layers.DenseLayer(24, 24, activation='sigmoid', weights_initializer='heUniform'))
+    layer_list.append(layers.DenseLayer(24, 24, activation='sigmoid', weights_initializer='heUniform'))
     layer_list.append(layers.DenseLayer(24, 2, activation='softmax', weights_initializer='heUniform'))
     network = model.createNetwork(layer_list)
-    # Network structure definition
-    """ layer_list = []
+    layer_list = []
     layer_list.append(layers.DenseLayer(x_train.shape[1], 50, activation='relu', learning_rate=learning_rate))
     layer_list.append(layers.DenseLayer(50, 100, activation='relu', weights_initializer='heUniform'))
     layer_list.append(layers.DenseLayer(100, 2, activation='sigmoid', weights_initializer='heUniform'))
-    network = model.createNetwork(layer_list)"""
+    network = model.createNetwork(layer_list)
+
     # Training loop
-    for epoch in range(epochs):
-        # Train the model on each mini-batch
-        for x_batch, y_batch in separate_batches(x_train, y_train, batch_size=batch_size):
-            network.train(x_batch, y_batch)
-
-        # Compute intermediary metrics on training set and validation set
-        predictions_train = network.predict(x_train)
-        labels_train = convert_predictions_to_labels(predictions_train)
-        acc_log.append(np.mean(labels_train == y_train))
-        loss_log.append(binary_cross_entropy(y_train, predictions_train))
-
-        predictions_valid = network.predict(x_valid)
-        labels_valid = convert_predictions_to_labels(predictions_valid)
-        val_acc_log.append(np.mean(labels_valid == y_valid))
-        val_loss_log.append(binary_cross_entropy(y_valid, predictions_valid))
-
-        print(f"epoch {epoch}/{epochs} - ", end="")
-        print(f"loss: {loss_log[-1]:.5f} - ", end="")
-        print(f"val_loss: {val_loss_log[-1]:.5f} - ", end="")
-        print(f"acc: {acc_log[-1]:.5f} - ", end="")
-        print(f"val_acc: {val_acc_log[-1]:.5f}")
+    model.fit(network, x_train, y_train, x_valid, y_valid, epochs, batch_size)
     
     # Concluding actions (model save, metric display)
     if confirm_file_save():
         os.makedirs(os.path.dirname(model_path), exist_ok=True)
         file = open(model_path, "wb")
         print(f"> saving model '{model_path}' to disk...")
+        network.name = model_path
         pickle.dump(network, file)
-    plt.plot(acc_log, label='train accuracy')
-    plt.plot(val_acc_log, label='val accuracy')
+    plt.plot(network.acc_log, label='train accuracy')
+    plt.plot(network.val_acc_log, label='val accuracy')
     plt.legend(loc='best')
     plt.show()
-    plt.plot(loss_log, label='train loss')
-    plt.plot(val_loss_log, label='val loss')
+    plt.plot(network.loss_log, label='train loss')
+    plt.plot(network.val_loss_log, label='val loss')
     plt.legend(loc='best')
     plt.grid()
     plt.show()

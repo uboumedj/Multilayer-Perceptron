@@ -20,7 +20,6 @@ def main(data, model_path, details):
     x = dataset.drop(dataset.columns[0], axis=1)
     x = np.array(normalize_minmax(x))
     y = np.array(dataset.iloc[:, 0]).reshape(-1, 1)
-    y = np.array(dataset.iloc[:, 0]).reshape(-1, 1)
     y = encode_one_hot(y)
 
     # Load the model
