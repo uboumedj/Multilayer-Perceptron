@@ -32,7 +32,7 @@ class Model():
             activations.append(layer.forward(input))
             input = activations[-1]
         return activations
-    
+
     def predict(self, x):
         """
         Computes the predictions of the network on a dataset
@@ -44,12 +44,12 @@ class Model():
         predictions = self.feed_forward(x)[-1]
         return predictions
 
-    def train_one_epoch(self, X, y):    
+    def train_one_epoch(self, X, y):
         # Feed-forward part: get the network layers' activations
         layer_activations = self.feed_forward(X)
         layer_inputs = [X] + layer_activations
         y_pred = layer_activations[-1]
-        
+
         # Compute the loss and the initial (or final?) gradient
         last_gradient = (y_pred - y) / y_pred.shape[0]
 
@@ -57,7 +57,7 @@ class Model():
         for i in range(len(self.layer_list))[::-1]:
             layer = self.layer_list[i]
             last_gradient = layer.backward(layer_inputs[i], last_gradient)
-    
+
     def _check_validity_layers(self, layer_list):
         """
         Checks the validity of the layer list received during
@@ -80,13 +80,16 @@ class Model():
         """
         Called when printing an instance of this class
         """
-        model_to_string = f"Model {self.name if self.name is not None else ''}\n"
+        model_to_string = f"Model "
+        model_to_string = f"{self.name if self.name is not None else ''}\n"
         model_to_string += f"Layer structure: \n"
         for i in range(0, len(self.layer_list)):
-            model_to_string += f"Layer {i + 1}. " + self.layer_list[i].__str__() + "\n"
-        model_to_string += f"Model has been trained for {self.epochs_trained} epochs "
+            model_to_string += f"Layer {i + 1}. "
+            model_to_string += self.layer_list[i].__str__() + "\n"
+        model_to_string += f"Model trained for {self.epochs_trained} epochs "
         model_to_string += f"and is currently "
-        model_to_string += f"{'not ' if not self.finished_training else ''}trained."
+        model_to_string += f"{'not ' if not self.finished_training else ''}"
+        model_to_string += f"trained."
         return model_to_string
 
 
@@ -125,20 +128,26 @@ def separate_batches(x, y, batch_size):
 def fit(network, x_train, y_train, x_valid, y_valid, epochs, batch_size):
     for epoch in range(epochs):
         # Train the model on each mini-batch
-        for x_batch, y_batch in separate_batches(x_train, y_train, batch_size=batch_size):
+        for x_batch, y_batch in separate_batches(x_train,
+                                                 y_train,
+                                                 batch_size=batch_size):
             network.train_one_epoch(x_batch, y_batch)
         network.epochs_trained += 1
 
         # Compute intermediary metrics on training set and validation set
         predictions_train = network.predict(x_train)
         labels_train = convert_predictions_to_labels(predictions_train)
-        network.acc_log.append(np.mean(labels_train == y_train))
-        network.loss_log.append(binary_cross_entropy(y_train, predictions_train))
+        acc = np.mean(labels_train == y_train)
+        network.acc_log.append(acc)
+        loss = binary_cross_entropy(y_train, predictions_train)
+        network.loss_log.append(loss)
 
         predictions_valid = network.predict(x_valid)
         labels_valid = convert_predictions_to_labels(predictions_valid)
-        network.val_acc_log.append(np.mean(labels_valid == y_valid))
-        network.val_loss_log.append(binary_cross_entropy(y_valid, predictions_valid))
+        val_acc = np.mean(labels_valid == y_valid)
+        network.val_acc_log.append(val_acc)
+        val_loss = binary_cross_entropy(y_valid, predictions_valid)
+        network.val_loss_log.append(val_loss)
 
         print(f"epoch {epoch}/{epochs} - ", end="")
         print(f"loss: {network.loss_log[-1]:.5f} - ", end="")

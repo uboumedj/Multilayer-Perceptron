@@ -157,5 +157,6 @@ class DenseLayer:
         """
         layer_to_string = f"{self.weights.shape[1]} neurons, "
         layer_to_string += f"{self.activation} activation function, "
-        layer_to_string += f"weights initialised using {self.weights_initializer}."
+        layer_to_string += f"weights initialised using "
+        layer_to_string += f"{self.weights_initializer}."
         return layer_to_string

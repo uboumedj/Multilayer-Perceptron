@@ -1,0 +1,10 @@
+
+layer_list.append(layers.DenseLayer(x_train.shape[1], 50, activation='relu', weights_initializer='heUniform'))
+layer_list.append(layers.DenseLayer(50, 100, activation='relu', weights_initializer='heUniform'))
+layer_list.append(layers.DenseLayer(100, 100, activation='relu', weights_initializer='heUniform'))
+layer_list.append(layers.DenseLayer(100, 2, activation='softmax', weights_initializer='heUniform'))
+
+
+layer_list.append(layers.DenseLayer(x_train.shape[1], 50, activation='relu', weights_initializer='heUniform'))
+layer_list.append(layers.DenseLayer(50, 100, activation='relu', weights_initializer='heUniform'))
+layer_list.append(layers.DenseLayer(100, 2, activation='sigmoid', weights_initializer='heUniform'))

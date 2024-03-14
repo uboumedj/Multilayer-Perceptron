@@ -12,7 +12,7 @@ from utilities import encode_one_hot, normalize_minmax
 
 def confirm_file_save():
     """
-    Asks for confirmation before saving model (you don't want to save 
+    Asks for confirmation before saving model (you don't want to save
     a random experimental model)
     Returns:
         Boolean representing the user's decision
@@ -23,8 +23,6 @@ def confirm_file_save():
     print(f"Model was discarded !")
     return False
 
-# A FAIRE: Fonction de création de layers qui prend en compte les parametres
-# du programme. Ensuite: RENDRE
 
 def plot_metrics(network):
     """
@@ -35,6 +33,7 @@ def plot_metrics(network):
     fig, axs = plt.subplots(1, 2, figsize=(100, 100))
     axs[0].plot(network.acc_log, label='Training accuracy')
     axs[0].plot(network.val_acc_log, label='Validation accuracy')
+    axs[0].yaxis.set_ticks(np.arange(0.0, max(network.acc_log) + 0.1, 0.1))
     axs[0].set_title('Accuracy')
     axs[1].plot(network.loss_log, label='Training loss')
     axs[1].plot(network.val_loss_log, label='Validation loss')
@@ -63,13 +62,13 @@ def generate_layer_list(learning_rate, layer_sizes, x_train, y_train):
     for size in layer_sizes:
         neuron_amounts.append(size)
     neuron_amounts.append(len(np.unique(y_train)))
-    
+
     # Create layers
     layer_list = []
     for i in range(0, len(neuron_amounts)):
         in_size = neuron_amounts[i] if i == 0 else neuron_amounts[i - 1]
         out_size = neuron_amounts[i]
-        activation = 'softmax' if i == len(neuron_amounts) - 1 else 'sigmoid'
+        activation = 'softmax' if i == len(neuron_amounts) - 1 else 'relu'
         weights = 'heUniform' if activation == 'relu' else 'xavierUniform'
         new_layer = layers.DenseLayer(input_size=in_size,
                                       output_size=out_size,
@@ -111,20 +110,11 @@ def main(file, batch_size, epochs, learning_rate, loss, layer, model_path):
                                      layer_sizes=layer,
                                      x_train=x_train,
                                      y_train=y_train)
-
-    # layer_list = []
-    # layer_list.append(layers.DenseLayer(x_train.shape[1], 24, activation='relu', weights_initializer='heUniform'))
-    # layer_list.append(layers.DenseLayer(24, 24, activation='relu', weights_initializer='heUniform'))
-    # layer_list.append(layers.DenseLayer(24, 24, activation='sigmoid', weights_initializer='xavierUniform'))
-    # layer_list.append(layers.DenseLayer(24, 2, activation='softmax', weights_initializer='heUniform'))
-
     network = model.createNetwork(layer_list)
 
     # Training loop
     model.fit(network, x_train, y_train, x_valid, y_valid, epochs, batch_size)
-    print(network)
-    exit()
-    
+
     # Concluding actions (model save, metric display)
     if confirm_file_save():
         os.makedirs(os.path.dirname(model_path), exist_ok=True)
