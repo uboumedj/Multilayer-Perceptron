@@ -2,16 +2,20 @@ import numpy as np
 import pandas as pd
 import math
 import layers
+from copy import deepcopy
 from utilities import convert_predictions_to_labels
 from utilities import binary_cross_entropy
 
 
 class Model():
-    def __init__(self, layer_list):
+    def __init__(self, layer_list, loss=None, early_stopping=False):
         self.layer_list = self._check_validity_layers(layer_list)
         self.finished_training = False
+        self.early_stopping = early_stopping
+        self.cached_state = None
         self.epochs_trained = 0
         self.name = None
+        self.loss_function = loss
         self.acc_log = []
         self.val_acc_log = []
         self.loss_log = []
@@ -93,7 +97,7 @@ class Model():
         return model_to_string
 
 
-def createNetwork(layer_list):
+def createNetwork(layer_list, loss, early_stopping):
     """
     Creates a Model object composed of the given layers
     Arguments:
@@ -101,7 +105,9 @@ def createNetwork(layer_list):
     Returns:
         The resulting Model object
     """
-    network = Model(layer_list=layer_list)
+    network = Model(layer_list=layer_list,
+                    loss=loss,
+                    early_stopping=early_stopping)
     return network
 
 
@@ -123,6 +129,30 @@ def separate_batches(x, y, batch_size):
     for start_idx in range(0, len(x) - batch_size + 1, batch_size):
         excerpt = indices[start_idx:start_idx + batch_size]
         yield x[excerpt], y[excerpt]
+
+
+def check_stop_early(network):
+    """
+    Rough implementation of early stopping
+    Arguments:
+        network (Model): The neural network
+    Returns:
+        Whether the conditions for early stopping were triggered or not
+    """
+    if network.acc_log[-1] >= 0.9 and network.loss_log[-1] <= 0.2:
+        if network.val_loss_log[-1] > network.loss_log[-1]:
+            if len(network.loss_log) > 5:
+                counter = 0
+                for i in range(-5, 0, 1):
+                    if network.val_loss_log[i] > network.loss_log[i]:
+                        counter += 1
+                if (counter >= 4
+                   and network.val_loss_log[-1] > network.val_loss_log[-5]
+                   and network.cached_state is not None):
+                    network.layer_list = network.cached_state
+                    return True
+        network.cached_state = deepcopy(network.layer_list)
+    return False
 
 
 def fit(network, x_train, y_train, x_valid, y_valid, epochs, batch_size):
@@ -154,4 +184,9 @@ def fit(network, x_train, y_train, x_valid, y_valid, epochs, batch_size):
         print(f"val_loss: {network.val_loss_log[-1]:.5f} - ", end="")
         print(f"acc: {network.acc_log[-1]:.5f} - ", end="")
         print(f"val_acc: {network.val_acc_log[-1]:.5f}")
+        if network.early_stopping:
+            if check_stop_early(network):
+                print(f"warning: Early stopping triggered at {epoch} epochs")
+                break
+
     network.finished_training = True

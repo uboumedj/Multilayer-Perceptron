@@ -5,7 +5,7 @@ import math
 
 def he_uniform(shape):
     """
-    Initialises the weights of a perceptron using the He Uniform method
+    Initialises the weights of a layer using the He Uniform method
     Arguments:
         shape (tuple): the shape of the layer's input and output units
     Returns:
@@ -22,7 +22,7 @@ def he_uniform(shape):
 
 def he_normal(shape):
     """
-    Initialises the weights of a perceptron using the He Normal method
+    Initialises the weights of a layer using the He Normal method
     Arguments:
         shape (tuple): the shape of the layer's input and output units
     Returns:
@@ -39,7 +39,7 @@ def he_normal(shape):
 
 def xavier_uniform(shape):
     """
-    Initialises the weights of a perceptron using the Xavier(Glorot)
+    Initialises the weights of a layer using the Xavier(Glorot)
     Uniform method
     Arguments:
         shape (tuple): the shape of the layer's input and output units
@@ -58,7 +58,7 @@ def xavier_uniform(shape):
 
 def xavier_normal(shape):
     """
-    Initialises the weights of a perceptron using the Xavier(Glorot)
+    Initialises the weights of a layer using the Xavier(Glorot)
     Normal method
     Arguments:
         shape (tuple): the shape of the layer's input and output units
@@ -77,7 +77,7 @@ def xavier_normal(shape):
 
 def random_normal(shape, deviation=0.01):
     """
-    Initialises the weights of a perceptron with random values spread
+    Initialises the weights of a layer with random values spread
     in a Normal manner
     Arguments:
         shape (tuple): the shape of the layer's input and output units
@@ -96,7 +96,7 @@ def random_normal(shape, deviation=0.01):
 
 def random_uniform(shape, deviation=0.05):
     """
-    Initialises the weights of a perceptron with random values spread
+    Initialises the weights of a layer with random values spread
     in a Uniform manner
     Arguments:
         shape (tuple): the shape of the layer's input and output units

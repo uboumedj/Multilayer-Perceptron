@@ -86,15 +86,18 @@ def generate_layer_list(learning_rate, layer_sizes, x_train, y_train):
               help='Size of mini-batches for training')
 @click.option('--epochs', default=84,
               help='Number of epochs to train the model')
-@click.option('--learning_rate', default=0.0314,
+@click.option('--learning_rate', default=0.00314,
               help='Learning rate of the model')
 @click.option('--loss', default='binaryCrossentropy',
               help='Loss function used to evaluate model')
+@click.option('--early_stopping', default=False,
+              help='Whether to use Early stopping or not')
 @click.option('-l', '--layer', default=(24, 24), multiple=True,
               help='Size of hidden layers')
 @click.option('--model_path', default='models/mlp.pkl',
               help="Path of the saved model's pickle file")
-def main(file, batch_size, epochs, learning_rate, loss, layer, model_path):
+def main(file, batch_size, epochs, learning_rate, loss, early_stopping,
+         layer, model_path):
     # Preparation of the dataset for the training
     dataset = load_data_from_file(file)
     x = dataset.drop(dataset.columns[0], axis=1)
@@ -103,14 +106,13 @@ def main(file, batch_size, epochs, learning_rate, loss, layer, model_path):
     x_train, x_valid, y_train, y_valid = split_data(x, y, 0.801)
     y_train = encode_one_hot(y_train)
     y_valid = encode_one_hot(y_valid)
-
     # Network structure definition
     layer_list = []
     layer_list = generate_layer_list(learning_rate=learning_rate,
                                      layer_sizes=layer,
                                      x_train=x_train,
                                      y_train=y_train)
-    network = model.createNetwork(layer_list)
+    network = model.createNetwork(layer_list, loss, early_stopping)
 
     # Training loop
     model.fit(network, x_train, y_train, x_valid, y_valid, epochs, batch_size)

@@ -8,12 +8,12 @@ warnings.filterwarnings('ignore', category=RuntimeWarning)
 
 
 class DenseLayer:
-    def __init__(self, input_size, output_size, learning_rate=0.0314,
+    def __init__(self, input_size, output_size, learning_rate=0.00314,
                  weights_initializer='heUniform', activation='sigmoid'):
         if (not isinstance(learning_rate, float) or learning_rate <= 0.0):
             print(f"warning: Layer learning rate <{learning_rate}> invalid. " +
                   "Reverting to default learning rate value of 0.0314")
-            learning_rate = 0.0314
+            learning_rate = 0.00314
         if (not isinstance(input_size, int) or input_size <= 0):
             print(f"warning: Layer input size <{input_size}> invalid. " +
                   "Attempting input size value of 24 but it might not work")
@@ -159,4 +159,5 @@ class DenseLayer:
         layer_to_string += f"{self.activation} activation function, "
         layer_to_string += f"weights initialised using "
         layer_to_string += f"{self.weights_initializer}."
+        layer_to_string += f" LR: {self.learning_rate}"
         return layer_to_string
